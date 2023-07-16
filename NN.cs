@@ -1,6 +1,7 @@
-		class NeuralNetwork
+		[Serializable]
+		class NN
 		{
-			private const double learningRate = 0.00015f;
+			private const double learningRate = 0.00015;
 
 			private List<List<double>> biases;
 			private List<List<double>> errors;
@@ -9,7 +10,7 @@
 
 			private Random r = new Random();
 
-			public NeuralNetwork(int[] layers)
+			public NN(int[] layers)
 			{
 				initNeurons(layers);
 				initWeights(layers);
@@ -106,7 +107,7 @@
 
 			public double[] getTanhOutput(double[] inputs)
 			{
-                System.Diagnostics.Contracts.Contract.Requires(inputs.Length == values[0].Count());
+				System.Diagnostics.Contracts.Contract.Requires(inputs.Length == values[0].Count());
 
 				for (int neuronIdx = 0; neuronIdx < inputs.Length; neuronIdx++)
 				{
@@ -261,5 +262,27 @@
 			{
 				getSigmoidOutput(inputs);
 				backPropagateSigmoid(correctOutput);
+			}
+
+			public void Save()
+			{
+				using (FileStream fileStream = new FileStream("brain.dat", FileMode.Create))
+				{
+					System.Runtime.Serialization.Formatters.Binary.BinaryFormatter binaryFormatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+					binaryFormatter.Serialize(fileStream, this);
+				}
+			}
+
+			public void Load()
+			{
+				using (FileStream fileStream = new FileStream("brain.dat", FileMode.Open))
+				{
+					System.Runtime.Serialization.Formatters.Binary.BinaryFormatter binaryFormatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+					NN brain = (NN)binaryFormatter.Deserialize(fileStream);
+					this.values = brain.values;
+					this.weights = brain.weights;
+					this.biases = brain.biases;
+					this.errors = brain.errors;
+				}
 			}
 		}
